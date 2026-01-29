@@ -1,5 +1,6 @@
 const express = require('express')
 const auth = require('../middleware/auth')
+const bcrypt = require("bcryptjs")
 const router = new express.Router()
 const User = require("../models/User")
 require('dotenv').config()
@@ -38,6 +39,21 @@ router.post('/signin', async (req, res) => {
     }
     catch (e) {
         res.status(500).send(e)
+    }
+})
+
+router.patch('/change-password', auth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const isMatch = await bcrypt.compare(currentPassword, req.user.password);
+        if (!isMatch) {
+            return res.status(400).send({ error: 'Invalid current password' });
+        }
+        req.user.password = newPassword;
+        await req.user.save();
+        res.send({ user: req.user, message: 'Password updated successfully' });
+    } catch (e) {
+        res.status(500).send(e);
     }
 })
 
