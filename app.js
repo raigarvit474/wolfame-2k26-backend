@@ -30,12 +30,17 @@ app.use('/winner', winnerRouter)
 app.use('/leaderboard', leaderboardRouter)
 
 // Serve static files from the React frontend app
-app.use(express.static(path.join(__dirname, '../frontend/build')));
+// app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+// Health check route
+app.get('/', (req, res) => {
+    res.json({ message: "Wolfame Backend is running successfully!" });
+});
 
 // Anything that doesn't match the above routes, send back index.html
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
-});
+// app.get('*', (req, res) => {
+//     res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+// });
 
 app.listen(port, () => {
     console.log(`Server is running on ${port}`)
