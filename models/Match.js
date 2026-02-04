@@ -22,7 +22,6 @@ const matchSchema = new mongoose.Schema({
     },
     time: {
         type: Date,
-        required: true,
     },
     matchType: {
         type: String,
