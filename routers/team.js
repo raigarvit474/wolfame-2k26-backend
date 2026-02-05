@@ -76,9 +76,31 @@ router.delete('/:id', auth, async (req, res) => {
         if (req.user.role !== 'admin') {
             return res.status(403).send({ error: 'Only admins can delete teams.' });
         }
+
+        const team = await Team.findById(req.params.id);
+        if (!team) {
+            return res.status(404).send();
+        }
+
+        const residence = team.residence;
+
         await Team.deleteOne({ _id: req.params.id });
+
+        // Sync Leaderboard Points for the residence after deletion
+        if (residence) {
+            const residenceTeams = await Team.find({ residence: residence });
+            const totalPoints = residenceTeams.reduce((sum, t) => sum + (t.points || 0), 0);
+
+            await Leaderboard.findOneAndUpdate(
+                { residence: residence },
+                { points: totalPoints },
+                { upsert: true }
+            );
+        }
+
         res.send();
     } catch (e) {
+        console.error(e);
         res.status(500).send();
     }
 });
